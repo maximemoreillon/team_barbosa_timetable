@@ -27,18 +27,18 @@
         <!-- Indication of the time -->
 
         <div class="lesson_time" v-if="open">
-          {{days[lesson.day][settings.language]}} {{render_time(lesson.time.start)}} - {{render_time(lesson.time.end)}}
+          {{$store.state.days[lesson.day].full[$store.state.language]}} {{render_time(lesson.time.start)}} - {{render_time(lesson.time.end)}}
         </div>
 
 
         <div class="lesson_content">
           <!-- Name of the lesson -->
-          <div class="lesson_label" v-html="lesson.label[settings.language]"/>
+          <div class="lesson_label" v-html="lesson.label[$store.state.language]"/>
 
           <div
             class="lesson_description"
             v-if="lesson.details && open"
-            v-html="lesson.details[settings.language]">
+            v-html="lesson.details[$store.state.language]">
 
           </div>
         </div>
@@ -57,6 +57,7 @@
         width: width,
         top: top,
         left:left,
+        zIndex: default_z_index-1
         }">
 
       <div
@@ -77,22 +78,16 @@ export default {
   name: 'Lesson',
   props: {
     lesson: Object,
-    settings: Object,
   },
   data(){
     return {
       open: false,
       z_index: undefined,
-      days: [
-        {jp: '月曜日', en: 'Monday'},
-        {jp: '火曜日', en: 'Tuesday'},
-        {jp: '水曜日', en: 'Wednesday'},
-        {jp: '木曜日', en: 'Thursday'},
-        {jp: '金曜日', en: 'Friday'},
-        {jp: '土曜日', en: 'Saturdday'},
-        {jp: '日曜日', en: 'Sunday'},
-      ]
+
     }
+  },
+  mounted(){
+    this.z_index = this.default_z_index
   },
   methods: {
     render_time(raw_time){
@@ -109,20 +104,31 @@ export default {
     },
     close_lesson() {
       this.open = false;
-      setTimeout(() => {this.z_index = undefined},250)
+      setTimeout(() => {this.z_index = this.default_z_index},250)
     }
 
   },
   computed:  {
 
+    default_z_index() {
+      if(this.lesson.half) return 3
+      else return undefined
+    },
+
+
     top(){
-      return 100*(this.lesson.time.start-this.settings.start_time)/this.day_duration+'%'
+      return 100*(this.lesson.time.start-this.$store.state.start_time)/this.day_duration+'%'
     },
     left(){
-      return 100 * this.lesson.day/7+ '%'
+      if(this.lesson.half) {
+        if(this.lesson.half === 'right') return `${(100 * this.lesson.day/7) + (0.5*100/7)}%`
+        else return `${100 * this.lesson.day/7}%`
+      }
+      else return `${100 * this.lesson.day/7}%`
     },
     width(){
-      return (100/7) + '%'
+      if(this.lesson.half) return `${0.5*(100/7)}%`
+      return `${(100/7)}%`
     },
     height(){
       return 100*this.duration/this.day_duration+'%'
@@ -131,7 +137,7 @@ export default {
       return this.lesson.time.end - this.lesson.time.start
     },
     day_duration(){
-      return this.settings.end_time - this.settings.start_time
+      return this.$store.state.end_time - this.$store.state.start_time
     }
   }
 }
