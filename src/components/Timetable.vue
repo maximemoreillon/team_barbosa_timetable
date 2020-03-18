@@ -21,7 +21,14 @@
       v-for="hour in $store.state.end_time-$store.state.start_time"
       v-bind:key="hour"
       v-bind:style="{top: 100*(hour-1)/($store.state.end_time-$store.state.start_time)+ '%', height: 100/($store.state.end_time-$store.state.start_time) + '%'}">
-      {{$store.state.start_time + hour}}:00
+
+      <span
+        class="hour_marker"
+        v-for="i in 2"
+        v-bind:key="`hour${i}`">
+        {{$store.state.start_time + hour}}:00
+      </span>
+
 
     </div>
 
@@ -138,6 +145,7 @@ export default {
 
   display: flex;
   align-items: flex-end;
+  justify-content: space-between;
   padding: 0 5px;
 
 }

@@ -27,7 +27,7 @@
         <!-- Indication of the time -->
 
         <div class="lesson_time" v-if="open">
-          {{$store.state.days[lesson.day].full[$store.state.language]}} {{render_time(lesson.time.start)}} - {{render_time(lesson.time.end)}}
+          {{$store.state.days[lesson.day].full[$store.state.language]}} {{format_time(lesson.time.start)}} - {{format_time(lesson.time.end)}}
         </div>
 
 
@@ -90,7 +90,7 @@ export default {
     this.z_index = this.default_z_index
   },
   methods: {
-    render_time(raw_time){
+    format_time(raw_time){
       let hour = Math.floor(raw_time)
       let minutes = (raw_time - Math.floor(raw_time))*60
       return ((hour < 10) ? '0' : '') + hour + ":" + ((minutes < 10) ? '0' : '') + minutes
@@ -104,6 +104,7 @@ export default {
     },
     close_lesson() {
       this.open = false;
+      // prevent lesson from slipping below others when retracting
       setTimeout(() => {this.z_index = this.default_z_index},250)
     }
 
@@ -111,6 +112,7 @@ export default {
   computed:  {
 
     default_z_index() {
+      // Super flimsy
       if(this.lesson.half) return 3
       else return undefined
     },
